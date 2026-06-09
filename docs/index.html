@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Polyglot Live - Static Demo</title>
+  <meta name="description" content="Polyglot Live: a realtime multilingual voice assistant with streaming TTS and low latency." />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap");
+
+    :root {
+      --bg: #0a0f14;
+      --bg-2: #0e161f;
+      --bg-3: #121c27;
+      --grid: #1a2734;
+      --ink: #e7f0f8;
+      --muted: #96a6b8;
+      --teal: #2dd4bf;
+      --cyan: #38bdf8;
+      --amber: #fbbf24;
+      --red: #ef4444;
+      --border: #223245;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Space Grotesk", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(700px 400px at 10% -10%, rgba(45, 212, 191, 0.25), transparent 60%),
+        radial-gradient(600px 380px at 90% 5%, rgba(251, 191, 36, 0.18), transparent 55%),
+        linear-gradient(160deg, #0a0f14, #0b1420 45%, #0b1624 100%);
+      min-height: 100vh;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(26, 39, 52, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(26, 39, 52, 0.35) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container { max-width: 1120px; margin: 0 auto; padding: 32px 20px 80px; position: relative; z-index: 1; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      background: rgba(14, 22, 31, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+    }
+    .logo { font-weight: 700; letter-spacing: 0.4px; font-size: 1.05rem; }
+    nav { display: flex; gap: 16px; font-size: 0.92rem; }
+    nav a { color: var(--muted); text-decoration: none; }
+    nav a:hover { color: var(--ink); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      margin-top: 40px;
+      align-items: center;
+    }
+    .hero h1 { font-size: 3rem; line-height: 1.05; }
+    .hero p { color: var(--muted); font-size: 1.05rem; margin-top: 16px; }
+    .hero .cta {
+      display: flex;
+      gap: 14px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--ink);
+      background: var(--bg-2);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .btn.primary { background: linear-gradient(135deg, rgba(45, 212, 191, 0.2), rgba(56, 189, 248, 0.15)); border-color: rgba(56, 189, 248, 0.5); }
+    .btn:hover { transform: translateY(-2px); border-color: var(--cyan); }
+
+    .preview {
+      border: 1px solid var(--border);
+      background: var(--bg-2);
+      border-radius: 16px;
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    }
+    .preview .bar { height: 12px; border-radius: 999px; background: var(--bg-3); position: relative; overflow: hidden; }
+    .preview .bar span { position: absolute; top: 0; left: 0; height: 100%; background: var(--teal); width: 72%; }
+    .preview .msg {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(18, 28, 39, 0.9);
+      border: 1px solid rgba(34, 50, 69, 0.6);
+      font-size: 0.93rem;
+    }
+    .preview .msg.bot { border-left: 3px solid var(--teal); }
+    .preview .msg.user { border-left: 3px solid var(--amber); }
+
+    .section { margin-top: 64px; }
+    .section h2 { font-size: 1.8rem; margin-bottom: 12px; }
+    .section p { color: var(--muted); max-width: 720px; }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+    .card {
+      border: 1px solid var(--border);
+      background: rgba(14, 22, 31, 0.8);
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 140px;
+    }
+    .card h3 { font-size: 1.05rem; margin-bottom: 8px; }
+    .card p { color: var(--muted); font-size: 0.95rem; }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+    .step {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: rgba(10, 15, 20, 0.5);
+    }
+    .step span { color: var(--teal); font-weight: 600; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .metric {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: var(--bg-2);
+    }
+    .metric .value { font-size: 1.4rem; font-weight: 700; }
+    .metric .label { color: var(--muted); font-size: 0.85rem; }
+
+    .cta-strip {
+      margin-top: 64px;
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(45, 212, 191, 0.08));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .codeblock {
+      margin-top: 18px;
+      background: #0b1118;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: "Source Code Pro", monospace;
+      font-size: 0.85rem;
+      color: #cde7f3;
+      overflow-x: auto;
+    }
+
+    .fade-up { animation: fadeUp 0.6s ease both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    footer {
+      margin-top: 72px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr 1fr; }
+      .steps { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      header { flex-direction: column; align-items: flex-start; }
+      nav { flex-wrap: wrap; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2.2rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fade-up { animation: none; }
+      .btn:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="container">
+    <header class="fade-up">
+      <div class="logo">Polyglot Live</div>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#flow">Flow</a>
+        <a href="#metrics">Latency</a>
+        <a href="#start">Get started</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h1 class="fade-up delay-1">Realtime multilingual voice assistant demo page</h1>
+        <p class="fade-up delay-2">A static showcase for streaming LLM responses, barge-in control, and low-latency TTS playback. Built to match the live product UI while staying fully hostable on GitHub Pages.</p>
+        <div class="cta fade-up delay-3">
+          <a class="btn primary" href="#start">Launch guide</a>
+          <a class="btn" href="#features">Explore features</a>
+        </div>
+      </div>
+      <div class="preview fade-up delay-2">
+        <div class="bar"><span></span></div>
+        <div class="msg user">User: Can you summarize the last meeting?</div>
+        <div class="msg bot">Assistant: Here is a concise recap and the action items.</div>
+        <div class="bar"><span style="width: 58%; background: var(--amber);"></span></div>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <h2 class="fade-up">Built for live voice</h2>
+      <p class="fade-up delay-1">This demo mirrors the realtime pipeline: audio in, streaming response out, and TTS playback with echo suppression and latency overlays.</p>
+      <div class="feature-grid">
+        <div class="card fade-up delay-1">
+          <h3>Streaming TTS</h3>
+          <p>Sentence-level buffering sends partial responses to speech while the LLM continues generating.</p>
+        </div>
+        <div class="card fade-up delay-2">
+          <h3>Barge-in aware</h3>
+          <p>High-confidence speech interrupts playback for natural turn taking.</p>
+        </div>
+        <div class="card fade-up delay-3">
+          <h3>Latency telemetry</h3>
+          <p>TTFT, LLM total, TTS synth, and end-to-end timing indicators stay visible.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="flow" class="section">
+      <h2 class="fade-up">Realtime flow</h2>
+      <p class="fade-up delay-1">Each stage is tuned for low delay and clarity between listening and speaking.</p>
+      <div class="steps">
+        <div class="step fade-up delay-1"><span>1. Listen</span><br />VAD frames capture speech and build the utterance buffer.</div>
+        <div class="step fade-up delay-2"><span>2. Respond</span><br />LLM streams JSON. Only the response field goes to TTS.</div>
+        <div class="step fade-up delay-3"><span>3. Speak</span><br />Audio plays while mic is gated, then echo frames are drained.</div>
+      </div>
+    </section>
+
+    <section id="metrics" class="section">
+      <h2 class="fade-up">Latency snapshot</h2>
+      <p class="fade-up delay-1">Representative timings from a laptop speaker setup.</p>
+      <div class="metrics">
+        <div class="metric fade-up delay-1">
+          <div class="value">210ms</div>
+          <div class="label">LLM TTFT</div>
+        </div>
+        <div class="metric fade-up delay-2">
+          <div class="value">720ms</div>
+          <div class="label">LLM Total</div>
+        </div>
+        <div class="metric fade-up delay-2">
+          <div class="value">340ms</div>
+          <div class="label">TTS Synth</div>
+        </div>
+        <div class="metric fade-up delay-3">
+          <div class="value">1.2s</div>
+          <div class="label">End-to-End</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="start" class="section">
+      <h2 class="fade-up">Get started</h2>
+      <p class="fade-up delay-1">Drop this page into the docs folder and enable GitHub Pages from the main branch. Update the commands below to match your repo.</p>
+      <div class="codeblock fade-up delay-2">
+        git clone https://github.com/your-org/polyglot-live
+        cd polyglot-live
+        ./start_servers.sh
+        open http://localhost:7860
+      </div>
+      <div class="cta-strip fade-up delay-3">
+        <div>
+          <strong>Hosting tip:</strong> In GitHub settings, set Pages to serve from the docs folder on the main branch.
+        </div>
+        <a class="btn" href="#top">Back to top</a>
+      </div>
+    </section>
+
+    <footer>
+      Static demo page for Polyglot Live. Replace links and metrics with your live values.
+    </footer>
+  </div>
+</body>
+</html>

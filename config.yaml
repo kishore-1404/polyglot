@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────
+#  Polyglot Live — Central Configuration
+#  Edit the paths under `models:` to match your system.
+# ─────────────────────────────────────────────────────────────
+
+models:
+  llm_gguf:    "/home/omkiran/Gemma4_Models/gemma-4-E2B-it-Q8_0.gguf"
+  mmproj_gguf: "/home/omkiran/Gemma4_Models/mmproj-F16.gguf"
+
+llama_server:
+  host:       "0.0.0.0"
+  port:       8175
+  gpu_layers: 99
+  ctx_size:   32768
+  # Disabling thinking = faster latency for conversational voice use
+  enable_thinking: false
+
+supertonic:
+  port:          9988
+  default_voice: "M1"
+
+# VAD — Silero v5 requires exactly 512, 1024, or 1536 samples at 16kHz
+vad:
+  frame_samples:   512      # 32ms — minimum valid size
+  threshold:       0.5
+  silence_trigger: 1.3      # seconds of silence → end of utterance
+  max_speech_secs: 28.5     # hard cap before forced flush
+  overlap_secs:    1.5      # overlap kept after forced flush
+
+inference:
+  temperature:  1
+  top_p:        0.95
+  top_k:        64
+  max_tokens:   512
+
+languages:
+  supported: ["en", "hi", "es"]
+  default:   "en"
+
+features:
+  barge_in:           true   # interrupt TTS when user speaks
+  barge_in_threshold: 0.85   # VAD prob to trigger barge-in
+  barge_in_frames:    8      # consecutive frames needed (~256ms)
+  barge_in_echo_coeff: 0.3   # acoustic coupling coefficient (ratio of play sound leaking to mic)
+  barge_in_rms_offset: 400.0 # noise gate offset for barge-in thresholding
+  streaming_tts:      true   # play sentence 1 while LLM generates sentence 2
+  history_turns:      20     # max turns kept in context
+  echo_decay_ms:      280    # ms after TTS before re-enabling mic (headset=50, laptop=280, echoey room=400)
+
+ui:
+  web_port:  7860
+  log_level: "DEBUG"          # DEBUG | INFO | WARNING
