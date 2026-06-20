@@ -43,8 +43,9 @@ class VADProcessor:
         # Initialize ONNX inference session on CPU execution provider
         self._session = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
         
-        # Initialize RNN state (2 layers, batch size 1, 64 dimension)
-        self._state = np.zeros((2, 1, 64), dtype=np.float32)
+        # Initialize RNN states (2 layers, batch size 1, 64 dimension)
+        self._h = np.zeros((2, 1, 64), dtype=np.float32)
+        self._c = np.zeros((2, 1, 64), dtype=np.float32)
 
     @property
     def frame_ms(self) -> float:
@@ -52,25 +53,28 @@ class VADProcessor:
 
     def reset(self):
         """Reset the VAD RNN state."""
-        self._state = np.zeros((2, 1, 64), dtype=np.float32)
+        self._h = np.zeros((2, 1, 64), dtype=np.float32)
+        self._c = np.zeros((2, 1, 64), dtype=np.float32)
 
     def get_prob(self, frame_int16: np.ndarray) -> float:
         """Return speech probability [0..1] for a single frame."""
         # Convert int16 to float32 normalized in [-1.0, 1.0]
         f32 = frame_int16.astype(np.float32) / 32768.0
         f32_input = np.expand_dims(f32, axis=0)  # Shape (1, 512)
-        sr_input = np.array([self.sample_rate], dtype=np.int64)
+        sr_input = np.array(self.sample_rate, dtype=np.int64)
 
         # Run ONNX inference
         inputs = {
             "input": f32_input,
-            "state": self._state,
-            "sr": sr_input
+            "sr": sr_input,
+            "h": self._h,
+            "c": self._c
         }
         
         ort_outs = self._session.run(None, inputs)
         out_prob = ort_outs[0][0][0]
-        self._state = ort_outs[1]  # Keep updated RNN state for the next frame
+        self._h = ort_outs[1]  # Keep updated hidden state for next frame
+        self._c = ort_outs[2]  # Keep updated cell state for next frame
         
         return float(out_prob)
 
