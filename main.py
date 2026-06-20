@@ -81,6 +81,9 @@ def main():
         on_state_cbs.append(ws); on_turn_cbs.append(wt)
         on_text_ready_cbs.append(wtr); on_log_cbs.append(wl)
         on_latency_update_cbs.append(wlu)
+    
+    # Always print pipeline logs to stdout for debugging/troubleshooting
+    on_log_cbs.append(lambda m: print(f"  [pipeline] {m}"))
 
     use_term = (not args.web) or args.term
     term_ui  = None

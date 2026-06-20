@@ -205,6 +205,7 @@ ws.onmessage=e=>{
   if(m.type==='latency_update') handleLatencyUpdate(m);
   if(m.type==='mute_state')  syncMuteBtn(m.muted);
   if(m.type==='demo_state')  handleDemoState(m.value);
+  if(m.type==='log')         console.log('[pipeline]', m.message);
 };
 
 ws.onclose=()=>{stxt.textContent='⚠️  Disconnected';dot.className=''};
