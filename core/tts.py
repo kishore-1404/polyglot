@@ -163,7 +163,16 @@ class TTSClient:
             chunk_frames = int(sr * 0.05)    # 50ms chunks for responsive stop_event checks
             idx = 0
             channels = arr.shape[1] if arr.ndim > 1 else 1
-            with sd.OutputStream(samplerate=sr, channels=channels, dtype="float32") as stream:
+            
+            # Try to open output stream, fall back to simulation if no audio device
+            stream = None
+            try:
+                stream = sd.OutputStream(samplerate=sr, channels=channels, dtype="float32")
+                stream.start()
+            except Exception:
+                stream = None
+
+            try:
                 while idx < len(arr):
                     if stop_event and stop_event.is_set():
                         break
@@ -175,7 +184,13 @@ class TTSClient:
 
                     if arr.ndim == 1:
                         chunk = chunk.reshape(-1, 1)
-                    stream.write(chunk)
+                    
+                    if stream is not None:
+                        stream.write(chunk)
+                    else:
+                        # Simulate audio play timing for the duration of the chunk
+                        time.sleep(len(chunk) / sr)
+
                     if t_first is None:
                         t_first = time.perf_counter()   # ← actual first audio out
                         success = True
@@ -184,6 +199,13 @@ class TTSClient:
                     if on_audio_chunk:
                         on_audio_chunk(arr[idx:end], sr)
                     idx = end
+            finally:
+                if stream is not None:
+                    try:
+                        stream.stop()
+                        stream.close()
+                    except Exception:
+                        pass
         except Exception:
             pass
         finally:

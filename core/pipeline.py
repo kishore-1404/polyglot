@@ -185,11 +185,17 @@ class Pipeline:
 
     def run(self):
         self._running = True
-        with sd.InputStream(
-            samplerate=16000, channels=1, dtype="int16",
-            blocksize=self.vad.frame_samples,
-            callback=self._mic_callback,
-        ):
+        try:
+            with sd.InputStream(
+                samplerate=16000, channels=1, dtype="int16",
+                blocksize=self.vad.frame_samples,
+                callback=self._mic_callback,
+            ):
+                self._set_state(State.LISTENING)
+                while self._running:
+                    self._tick()
+        except Exception as e:
+            self._log(f"⚠️ sounddevice.InputStream failed: {e}. Running in headless/demo-only mode.")
             self._set_state(State.LISTENING)
             while self._running:
                 self._tick()

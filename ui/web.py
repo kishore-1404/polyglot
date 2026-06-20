@@ -196,7 +196,7 @@ const htbl=document.getElementById('htbl'), hbody=document.getElementById('hbody
 const hph=document.getElementById('hph');
 let muted=false, pendingTag=null, turnN=0;
 
-const ws=new WebSocket(`ws://${location.host}/ws`);
+const ws=new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws');
 ws.onmessage=e=>{
   const m=JSON.parse(e.data);
   if(m.type==='state')       handleState(m);
