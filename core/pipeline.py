@@ -723,16 +723,22 @@ class Pipeline:
 
             # Stream user WAV audio into self._audio_q
             import io, soundfile as sf
-            import torch, torchaudio
             try:
                 data, samplerate = sf.read(io.BytesIO(user_wav), dtype="float32")
                 if data.ndim > 1:
                     data = data[:, 0]
                 
                 if samplerate != 16000:
-                    tensor = torch.from_numpy(data).unsqueeze(0).float()
-                    resampler = torchaudio.transforms.Resample(samplerate, 16000)
-                    data_16k = resampler(tensor).squeeze(0).numpy()
+                    try:
+                        import torch, torchaudio
+                        tensor = torch.from_numpy(data).unsqueeze(0).float()
+                        resampler = torchaudio.transforms.Resample(samplerate, 16000)
+                        data_16k = resampler(tensor).squeeze(0).numpy()
+                    except ImportError:
+                        num_samples = int(len(data) * 16000 / samplerate)
+                        x_old = np.linspace(0, len(data) - 1, len(data))
+                        x_new = np.linspace(0, len(data) - 1, num_samples)
+                        data_16k = np.interp(x_new, x_old, data)
                 else:
                     data_16k = data
 
