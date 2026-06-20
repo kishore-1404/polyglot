@@ -30,7 +30,7 @@ class VADProcessor:
 
         if not os.path.exists(model_path):
             print("📥 Downloading Silero VAD ONNX model (~3MB)...")
-            url = "https://github.com/snakers4/silero-vad/raw/master/files/silero_vad.onnx"
+            url = "https://models.silero.ai/vad_models/silero_vad.onnx"
             try:
                 urllib.request.urlretrieve(url, model_path)
                 print("✅ VAD Model download complete.")
