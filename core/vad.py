@@ -30,9 +30,12 @@ class VADProcessor:
 
         if not os.path.exists(model_path):
             print("📥 Downloading Silero VAD ONNX model (~3MB)...")
-            url = "https://models.silero.ai/vad_models/silero_vad.onnx"
+            url = "https://huggingface.co/freddyaboulton/silero-vad/resolve/main/silero_vad.onnx"
             try:
-                urllib.request.urlretrieve(url, model_path)
+                # Add headers to ensure download is robust
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req) as response, open(model_path, "wb") as out_file:
+                    out_file.write(response.read())
                 print("✅ VAD Model download complete.")
             except Exception as e:
                 raise RuntimeError(f"Failed to download VAD model: {e}")
