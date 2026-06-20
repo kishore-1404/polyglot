@@ -10,6 +10,7 @@ models:
 llama_server:
   host:       "0.0.0.0"
   port:       8175
+  url:        ""          # Remote endpoint override (e.g. "https://xxxx.ngrok-free.dev/llama")
   gpu_layers: 99
   ctx_size:   32768
   # Disabling thinking = faster latency for conversational voice use
@@ -17,6 +18,7 @@ llama_server:
 
 supertonic:
   port:          9988
+  url:           ""          # Remote endpoint override (e.g. "https://xxxx.ngrok-free.dev/tts")
   default_voice: "M1"
 
 # VAD — Silero v5 requires exactly 512, 1024, or 1536 samples at 16kHz

@@ -31,8 +31,11 @@ def _split_sentences(text: str) -> list:
 
 class LLMClient:
     def __init__(self, cfg: dict):
-        port       = cfg["llama_server"]["port"]
-        self.url   = f"http://localhost:{port}/v1/chat/completions"
+        if cfg["llama_server"].get("url"):
+            self.url = f"{cfg['llama_server']['url'].rstrip('/')}/v1/chat/completions"
+        else:
+            port = cfg["llama_server"]["port"]
+            self.url = f"http://localhost:{port}/v1/chat/completions"
         self.model = os.path.basename(cfg["models"]["llm_gguf"])
         self.inf   = cfg["inference"]
         self.langs = cfg["languages"]["supported"]

@@ -12,9 +12,25 @@ def load_cfg(path="config.yaml"):
 
 def check_servers(cfg):
     ok = True
+    
+    # llama-server check
+    llama_url = cfg["llama_server"].get("url")
+    if llama_url:
+        llama_url = f"{llama_url.rstrip('/')}/health"
+    else:
+        llama_url = f"http://localhost:{cfg['llama_server']['port']}/health"
+        
+    # supertonic check
+    tts_url = cfg["supertonic"].get("url")
+    if tts_url:
+        # Check /docs or /v1/tts for health depending on prefix structure
+        tts_url = f"{tts_url.rstrip('/')}/v1/tts"
+    else:
+        tts_url = f"http://localhost:{cfg['supertonic']['port']}/v1/tts"
+
     checks = [
-        ("llama-server",  "GET",  f"http://localhost:{cfg['llama_server']['port']}/health", None),
-        ("Supertonic V3", "POST", f"http://localhost:{cfg['supertonic']['port']}/v1/tts",
+        ("llama-server",  "GET",  llama_url, None),
+        ("Supertonic V3", "POST", tts_url,
          {"text": "ok", "lang": "en", "voice": "F1"}),
     ]
     print("\n  Server health check:")

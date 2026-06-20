@@ -28,9 +28,6 @@ try:
 except ImportError:
     AEC_AVAILABLE = False
 
-import torch
-import torchaudio
-
 _resamplers = {}
 
 def resample_chunk(chunk: np.ndarray, orig_sr: int, target_sr: int = 16000) -> np.ndarray:
@@ -42,6 +39,8 @@ def resample_chunk(chunk: np.ndarray, orig_sr: int, target_sr: int = 16000) -> n
         resampled = chunk
     else:
         try:
+            import torch
+            import torchaudio
             key = (orig_sr, target_sr)
             if key not in _resamplers:
                 _resamplers[key] = torchaudio.transforms.Resample(orig_sr, target_sr)

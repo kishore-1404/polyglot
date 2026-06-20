@@ -15,8 +15,13 @@ class TTSClient:
     def __init__(self, cfg: dict):
         port               = cfg["supertonic"]["port"]
         self.voice         = cfg["supertonic"]["default_voice"]
-        self.url_compat    = f"http://localhost:{port}/v1/audio/speech"
-        self.url_native    = f"http://localhost:{port}/v1/tts"
+        base_url = cfg["supertonic"].get("url")
+        if base_url:
+            base_url = base_url.rstrip('/')
+        else:
+            base_url = f"http://localhost:{port}"
+        self.url_compat    = f"{base_url}/v1/audio/speech"
+        self.url_native    = f"{base_url}/v1/tts"
         self.current_play_rms = 0.0
         self.demo_audio_dir = None
         self.demo_meta = {}
